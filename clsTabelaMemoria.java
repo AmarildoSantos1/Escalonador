@@ -1,21 +1,21 @@
 import java.awt.Color;
-import java.awt.Component; // Importe a classe Component
+import java.awt.Component; 
 import java.awt.Dimension;
 import javax.swing.*;
 import javax.swing.table.*;
 
 public class clsTabelaMemoria {
-    clsProcesso mtzMemoria[][];
-    JTable tblTabela;
-    int linhas;
-    int colunas;
+    private clsProcesso mtzMemoria[][];
+    private JTable tblTabela;
+    private int linhas;
+    private int colunas;
 
     public clsTabelaMemoria(int pLinhas, int pColunas, int pLargura, int pAltura) {
-        mtzMemoria = new clsProcesso[pLinhas][pColunas];
-        inicializarMatriz(pLinhas, pColunas);
-        tblTabela = new JTable();
         linhas = pLinhas;
         colunas = pColunas;
+        mtzMemoria = new clsProcesso[linhas][colunas];
+        inicializarMatriz(linhas, colunas);
+        tblTabela = new JTable();
         atribuirModelo();
         atribuirRenderer();
         tblTabela.setTableHeader(null);
@@ -23,9 +23,9 @@ public class clsTabelaMemoria {
     }
 
     public clsTabelaMemoria(int pLinhas, int pColunas, int pLargura, int pAltura, clsProcesso[][] pMtzMemoria) {
-        mtzMemoria = pMtzMemoria;
         linhas = pLinhas;
         colunas = pColunas;
+        mtzMemoria = pMtzMemoria;
         tblTabela = new JTable();
         atribuirModelo();
         atribuirRenderer();
@@ -38,16 +38,15 @@ public class clsTabelaMemoria {
     }
 
     public boolean adicionarProcesso(clsProcesso pProcesso, int tamanhoMaiorProcesso) {
-        int posicao[];
-        int y = 0;
-        int x = 0;
-        int contaGravacao = 0;
-        posicao = getPosicaoLivreDaMemoria();
+        int[] posicao = getPosicaoLivreDaMemoria();
         if (posicao[0] == -1 || posicao[2] < (pProcesso.getIntFrames() + tamanhoMaiorProcesso)) {
             return false;
         }
-        y = posicao[0];
-        x = posicao[1];
+
+        int y = posicao[0];
+        int x = posicao[1];
+        int contaGravacao = 0;
+
         do {
             do {
                 mtzMemoria[y][x].setPid(pProcesso.getIntPid());
@@ -66,26 +65,28 @@ public class clsTabelaMemoria {
             x = 0;
             y++;
         } while (y < linhas && contaGravacao < pProcesso.getIntFrames());
+
         atualizarTabela();
         return true;
     }
 
     public boolean removerProcesso(int pPid) {
         boolean removeu = false;
+
         for (int y = 0; y < linhas; y++) {
             for (int x = 0; x < colunas; x++) {
                 if (mtzMemoria[y][x].getIntPid() == pPid) {
-                    if (!removeu) {
-                        removeu = true;
-                    }
+                    removeu = true;
                     mtzMemoria[y][x].restaurar();
                 }
             }
         }
+
         if (removeu) {
             atualizarTabela();
             desfragmentar();
         }
+
         return removeu;
     }
 
@@ -95,17 +96,22 @@ public class clsTabelaMemoria {
         int x = 0;
         int y = 0;
         boolean achou;
+
         do {
             do {
                 achou = true;
+
                 if (mtzMemoria[y][x].getIntPid() == -1) {
                     xl = x;
                     yl = y;
+
                     do {
                         achou = false;
+
                         do {
                             if (mtzMemoria[yl][xl].getIntPid() != -1) {
                                 achou = true;
+
                                 mtzMemoria[y][x].setPid(mtzMemoria[yl][xl].getIntPid());
                                 mtzMemoria[y][x].setCor(mtzMemoria[yl][xl].getCor());
                                 mtzMemoria[y][x].setEstado(mtzMemoria[yl][xl].getEstado());
@@ -116,37 +122,38 @@ public class clsTabelaMemoria {
                                 mtzMemoria[y][x].setTipo(mtzMemoria[yl][xl].getTipo());
                                 mtzMemoria[y][x].setSelecionado(mtzMemoria[yl][xl].getSelecionado());
                                 mtzMemoria[y][x].setEliminado(mtzMemoria[yl][xl].getEliminado());
+
                                 mtzMemoria[yl][xl].restaurar();
                             }
+
                             xl++;
-                        } while (xl < colunas && achou == false);
+                        } while (xl < colunas && !achou);
+
                         xl = 0;
                         yl++;
-                    } while (yl < linhas && achou == false);
+                    } while (yl < linhas && !achou);
                 }
+
                 x++;
-            } while (x < colunas && achou == true);
+            } while (x < colunas && achou);
+
             x = 0;
             y++;
-        } while (y < linhas && achou == true);
+        } while (y < linhas && achou);
+
         atualizarTabela();
     }
 
     public boolean verificarSeEstaNaMemoria(clsProcesso pProcesso) {
-        int y = 0;
-        int x;
-        boolean retorno = false;
-        do {
-            x = 0;
-            do {
+        for (int y = 0; y < linhas; y++) {
+            for (int x = 0; x < colunas; x++) {
                 if (mtzMemoria[y][x].getIntPid() == pProcesso.getIntPid()) {
-                    retorno = true;
+                    return true;
                 }
-                x++;
-            } while (x < colunas && mtzMemoria[y][x - 1].getIntPid() != -1 && !retorno);
-            y++;
-        } while (y < linhas && mtzMemoria[y - 1][x - 1].getIntPid() != -1 && !retorno);
-        return retorno;
+            }
+        }
+
+        return false;
     }
 
     private void inicializarMatriz(int linhas, int colunas) {
@@ -164,7 +171,7 @@ public class clsTabelaMemoria {
     private void atribuirRenderer() {
         tblTabela.setDefaultRenderer(Object.class,
                 new DefaultTableCellRenderer() {
-                    @Override // Adicione o anotador @Override
+                    @Override
                     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
                         super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
                         setHorizontalAlignment(CENTER);
@@ -194,30 +201,27 @@ public class clsTabelaMemoria {
     }
 
     private int[] getPosicaoLivreDaMemoria() {
-        int y = 0;
-        int x;
-        int contPosicoes = 0;
-        int posicoes[] = {-1, -1, -1};
-        do {
-            x = 0;
-            do {
+        int[] posicoes = {-1, -1, -1};
+
+        for (int y = 0; y < linhas; y++) {
+            for (int x = 0; x < colunas; x++) {
                 if (mtzMemoria[y][x].getIntPid() == -1) {
                     if (posicoes[0] == -1) {
                         posicoes[0] = y;
                         posicoes[1] = x;
                     }
-                    contPosicoes++;
+
+                    posicoes[2]++;
                 }
-                x++;
-            } while (x < colunas);
-            y++;
-        } while (y < linhas);
-        posicoes[2] = contPosicoes;
+            }
+        }
+
         return posicoes;
     }
 
     public int contarFramesDisponiveis() {
         int count = 0;
+
         for (int y = 0; y < linhas; y++) {
             for (int x = 0; x < colunas; x++) {
                 if (mtzMemoria[y][x].getIntPid() == -1) {
@@ -225,30 +229,36 @@ public class clsTabelaMemoria {
                 }
             }
         }
+
         return count;
     }
 
     public void alocarProcesso(clsProcesso processo) {
         int tamanhoProcesso = processo.getIntFrames();
+
         for (int y = 0; y < linhas; y++) {
             for (int x = 0; x <= colunas - tamanhoProcesso; x++) {
                 boolean espacosDisponiveis = true;
+
                 for (int i = 0; i < tamanhoProcesso; i++) {
                     if (mtzMemoria[y][x + i].getIntPid() != -1) {
                         espacosDisponiveis = false;
                         break;
                     }
                 }
+
                 if (espacosDisponiveis) {
                     for (int i = 0; i < tamanhoProcesso; i++) {
                         mtzMemoria[y][x + i].setPid(processo.getIntPid());
                         mtzMemoria[y][x + i].setCor(processo.getCor());
                         // atribuir outras propriedades do processo, se necessário
                     }
+
                     return;
                 }
             }
         }
+
         // Se não houver espaço contíguo suficiente, você pode implementar outra lógica de alocação
         // Por exemplo, você pode procurar espaço em uma lista encadeada de segmentos livres
         // ou implementar uma política de substituição para liberar espaço
@@ -256,6 +266,7 @@ public class clsTabelaMemoria {
 
     public void alocarProcessoParcial(clsProcesso processo, int qtdFrames) {
         int framesRestantes = qtdFrames;
+
         for (int y = 0; y < linhas; y++) {
             for (int x = 0; x < colunas; x++) {
                 if (mtzMemoria[y][x].getIntPid() == -1) {
@@ -264,10 +275,41 @@ public class clsTabelaMemoria {
                     // atribuir outras propriedades do processo, se necessário
                     framesRestantes--;
                 }
+
                 if (framesRestantes == 0) {
                     return;
                 }
             }
         }
+    }
+
+    // Método para realizar paginação e swap
+    public void paginacaoESwap(clsPagina pagina, clsTabelaMemoria objMemoriaPrincipal, clsTabelaMemoria objMemoriaSecundaria) {
+        if (objMemoriaPrincipal.verificarSeEstaNaMemoria(pagina.getProcesso())) {
+            // Página já está na memória principal, não é necessário swap
+            return;
+        }
+
+        // Verifica se há espaço livre na memória principal para carregar a página
+        if (objMemoriaPrincipal.contarFramesDisponiveis() > 0) {
+            objMemoriaPrincipal.adicionarProcesso(pagina.getProcesso(), 0);
+            return;
+        }
+
+        // Se não houver espaço livre na memória principal, é necessário realizar o swap
+        clsProcesso processoASerRemovido = objMemoriaPrincipal.escolherProcessoParaSwap();
+        objMemoriaPrincipal.removerProcesso(processoASerRemovido.getIntPid());
+        objMemoriaSecundaria.adicionarProcesso(processoASerRemovido, 0);
+
+        // Carrega a nova página na memória principal
+        objMemoriaPrincipal.adicionarProcesso(pagina.getProcesso(), 0);
+    }
+    
+    // Método para escolher um processo para swap
+    public clsProcesso escolherProcessoParaSwap() {
+        // Implemente sua lógica para escolher um processo para swap aqui
+        // Por exemplo, você pode escolher o processo que está na memória há mais tempo,
+        // ou o processo com menor prioridade, dependendo dos requisitos do seu sistema
+        return null; // Aqui estou retornando null apenas como exemplo
     }
 }

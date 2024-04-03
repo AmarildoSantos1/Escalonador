@@ -185,7 +185,6 @@ public class frmPrincipal extends JFrame {
         pnlTabelaEmExecucao.setLayout(new FlowLayout());
         pnlEmExecucao.add(pnlTabelaEmExecucao, BorderLayout.CENTER);
 
-        // Aqui está a chamada corrigida para o construtor da classe clsTabelaProcessoEmExecucao
         objProcessoEmExecucao = new clsTabelaProcessoEmExecucao(250, 16, objProcessosBloqueados, objTabelaProcessos, objMemoriaPrincipal, objMemoriaSecundaria);
         JScrollPane scrEmExecucao = new JScrollPane(objProcessoEmExecucao.getTable());
         pnlTabelaEmExecucao.add(scrEmExecucao);

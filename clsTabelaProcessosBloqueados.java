@@ -65,19 +65,19 @@ public class clsTabelaProcessosBloqueados {
     public void eliminarProcesso(int Pid) {
         int x = getPosicaoPid(Pid);
         if (x != -1) {
-            do {
-                vetProcessos[x].setCor(vetProcessos[x + 1].getCor());
-                vetProcessos[x].setEstado(vetProcessos[x + 1].getEstado());
-                vetProcessos[x].setFrames(vetProcessos[x + 1].getIntFrames());
-                vetProcessos[x].setPid(vetProcessos[x + 1].getIntPid());
-                vetProcessos[x].setSelecionado(vetProcessos[x + 1].getSelecionado());
-                vetProcessos[x].setTempoCriacao(vetProcessos[x + 1].getIntTempoCriacao());
-                vetProcessos[x].setTempoUcp(vetProcessos[x + 1].getIntTempoUcp());
-                vetProcessos[x].setTipo(vetProcessos[x + 1].getTipo());
-                vetProcessos[x].setEliminado(vetProcessos[x + 1].getEliminado());
-                vetProcessos[x].setPaginacao(vetProcessos[x + 1].getPaginacao()); // Define o estado de paginação
-                x++;
-            } while (x < linhas && vetProcessos[x].getIntPid() != -1);
+            for (int i = x; i < linhas - 1; i++) {
+                vetProcessos[i].setCor(vetProcessos[i + 1].getCor());
+                vetProcessos[i].setEstado(vetProcessos[i + 1].getEstado());
+                vetProcessos[i].setFrames(vetProcessos[i + 1].getIntFrames());
+                vetProcessos[i].setPid(vetProcessos[i + 1].getIntPid());
+                vetProcessos[i].setSelecionado(vetProcessos[i + 1].getSelecionado());
+                vetProcessos[i].setTempoCriacao(vetProcessos[i + 1].getIntTempoCriacao());
+                vetProcessos[i].setTempoUcp(vetProcessos[i + 1].getIntTempoUcp());
+                vetProcessos[i].setTipo(vetProcessos[i + 1].getTipo());
+                vetProcessos[i].setEliminado(vetProcessos[i + 1].getEliminado());
+                vetProcessos[i].setPaginacao(vetProcessos[i + 1].getPaginacao()); // Define o estado de paginação
+            }
+            vetProcessos[linhas - 1] = new clsProcesso(); // Limpa a última posição
             atualizarTabela();
         }
     }

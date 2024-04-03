@@ -98,6 +98,17 @@ public class clsTabelaProcessoEmExecucao {
         atualizarTabela();
     }
 
+    public void eliminarProcesso(clsTabelaMemoria pMemoriaPrincipal, clsTabelaMemoria pMemoriaSecundaria) {
+        if (objProcesso.getIntPid() != -1) {
+            if (!memoriaPrincipal.removerProcesso(objProcesso.getIntPid())) {
+                memoriaSecundaria.removerProcesso(objProcesso.getIntPid());
+            }
+            objTabelaProcessosBloqueados.eliminarProcesso(objProcesso.getIntPid());
+            objProcesso.restaurar();
+            atualizarTabela();
+        }
+    }
+
     private void atribuirRenderer() {
         tblTabela.setDefaultRenderer(Object.class,
                 new DefaultTableCellRenderer() {
@@ -151,6 +162,6 @@ public class clsTabelaProcessoEmExecucao {
 
     private void swapProcessos(clsProcesso processo, int framesDisponiveis) {
         memoriaPrincipal.alocarProcessoParcial(processo, framesDisponiveis);
-        memoriaSecundaria.alocarProcesso(processo); // Remova o segundo argumento aqui
+        memoriaSecundaria.alocarProcesso(processo);
     }
 }

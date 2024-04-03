@@ -1,5 +1,5 @@
 import java.awt.Color;
-import javax.swing.JOptionPane;
+import java.util.ArrayList;
 
 public class clsProcesso {
     private int pid;
@@ -13,10 +13,45 @@ public class clsProcesso {
     private boolean selecionado;
     private boolean eliminado;
     private boolean paginacao; // Novo campo para estado de paginação
+    private ArrayList<clsPagina> paginas; // Lista de páginas associadas ao processo
 
     public clsProcesso() {
         restaurar();
+        paginas = new ArrayList<>();
     }
+
+    // Métodos getter e setter para lista de páginas
+    public ArrayList<clsPagina> getPaginas() {
+        return paginas;
+    }
+
+    public void adicionarPagina(clsPagina pagina) {
+        paginas.add(pagina);
+    }
+
+    // Método para realizar paginação e swap
+    public void paginacaoESwap(clsPagina pagina, clsTabelaMemoria objMemoriaPrincipal, clsTabelaMemoria objMemoriaSecundaria) {
+        if (objMemoriaPrincipal.verificarSeEstaNaMemoria(this)) {
+            // Página já está na memória principal, não é necessário swap
+            return;
+        }
+
+        // Verifica se há espaço livre na memória principal para carregar a página
+        if (objMemoriaPrincipal.contarFramesDisponiveis() > 0) {
+            objMemoriaPrincipal.adicionarProcesso(this, 0);
+            return;
+        }
+
+        // Se não houver espaço livre na memória principal, é necessário realizar o swap
+        clsProcesso processoASerRemovido = objMemoriaPrincipal.escolherProcessoParaSwap();
+        objMemoriaPrincipal.removerProcesso(processoASerRemovido.getIntPid());
+        objMemoriaSecundaria.adicionarProcesso(processoASerRemovido, 0);
+
+        // Carrega a nova página na memória principal
+        objMemoriaPrincipal.adicionarProcesso(this, 0);
+    }
+
+    // Outros métodos da classe...
 
     public void setPid(int pPid) {
         pid = pPid;

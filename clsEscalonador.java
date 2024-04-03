@@ -55,4 +55,25 @@ public class clsEscalonador {
             }
         });
     }
+
+    public void paginacaoESwap(clsPagina pagina, clsFrame frame) {
+        if (objMemoriaPrincipal.verificarSeEstaNaMemoria(pagina.getProcesso())) {
+            // Página já está na memória principal, não é necessário swap
+            return;
+        }
+
+        // Verifica se há espaço livre na memória principal para carregar a página
+        if (objMemoriaPrincipal.contarFramesDisponiveis() > 0) {
+            objMemoriaPrincipal.adicionarProcesso(pagina.getProcesso(), 0);
+            return;
+        }
+
+        // Se não houver espaço livre na memória principal, é necessário realizar o swap
+        clsProcesso processoASerRemovido = objMemoriaPrincipal.escolherProcessoParaSwap();
+        objMemoriaPrincipal.removerProcesso(processoASerRemovido.getIntPid());
+        objMemoriaSecundaria.adicionarProcesso(processoASerRemovido, 0);
+
+        // Carrega a nova página na memória principal
+        objMemoriaPrincipal.adicionarProcesso(pagina.getProcesso(), 0);
+    }
 }
